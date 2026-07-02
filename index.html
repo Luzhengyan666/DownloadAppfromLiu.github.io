@@ -1,0 +1,320 @@
+<html lang="zh-CN">
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>应用下载中心</title> 
+  <style>
+        :root {
+            --bg-color: #282828;
+            --card-bg: #E9E9E9;
+            --text-blue: #275AFF;
+            --text-card-sub: rgba(22, 158, 255, 1);
+            --btn-bg: #275AFF;
+            --btn-text: #ffffff;
+            --hint-color: rgba(255, 255, 255, 0.4);
+            --hover-shadow: 0 12px 30px rgba(59, 130, 246, 0.35);
+            --radius: 12px;
+            --search-bg: rgba(255, 255, 255, 0.08);
+            --search-border: rgba(255, 255, 255, 0.15);
+            --search-focus-border: #275AFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-blue);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 16px 80px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ✅ 搜索栏样式 */
+        .search-wrapper {
+            width: 100%;
+            max-width: 480px;
+            margin-bottom: clamp(24px, 5vw, 40px);
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: var(--search-bg);
+            border: 1px solid var(--search-border);
+            border-radius: 999px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+        .search-input:focus {
+            border-color: var(--search-focus-border);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(39, 90, 255, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .page-title {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-weight: 700;
+            margin-bottom: clamp(32px, 6vw, 60px);
+            letter-spacing: -0.5px;
+            text-align: center;
+            color: var(--text-blue);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(14px, 3vw, 28px);
+            max-width: 960px;
+            width: 100%;
+        }
+
+        .app-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-bg);
+            padding: clamp(28px, 5vw, 52px) clamp(16px, 4vw, 32px);
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--hover-shadow);
+            filter: brightness(1.08);
+        }
+
+        /* ✅ 搜索隐藏动画 */
+        .app-card.hidden {
+            display: none;
+        }
+
+        .app-name {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+            line-height: 1.3;
+            color: var(--text-blue);
+        }
+
+        .app-desc {
+            font-size: clamp(0.78rem, 3vw, 0.9rem);
+            color: var(--text-card-sub);
+            line-height: 1.4;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: clamp(8px, 2vw, 12px) clamp(24px, 5vw, 40px);
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            font-size: clamp(0.8rem, 3vw, 0.95rem);
+            font-weight: 600;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background-color: #1a4ae0;
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(39, 90, 255, 0.4);
+        }
+
+        /* ✅ 空状态提示 */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--hint-color);
+            font-size: 1rem;
+            display: none;
+        }
+
+        .no-results.visible { display: block; }
+
+        .update-hint {
+            margin-top: 48px;
+            font-size: 0.85rem;
+            color: var(--hint-color);
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 480px) {
+            .download-grid { grid-template-columns: 1fr; max-width: 100%; }
+            .app-card { padding: 24px 16px; }
+            .search-wrapper { max-width: 100%; }
+        }
+
+        @media (max-width: 320px) {
+            .app-desc { display: none; }
+        }
+    </style> 
+  <script src="js/jq.js"></script> 
+ </head> 
+ <body id="v1"> 
+  <!-- ✅ 搜索栏（位于标题上方） --> 
+  <div id="v2" class="search-wrapper"> 
+   <span id="v3" class="search-icon">🔍</span> 
+   <input type="text" class="search-input" id="searchInput" placeholder="搜索应用名称或描述..." autocomplete="off"> 
+  </div> 
+  <h1 id="v4" class="page-title">下载app 🖥📲</h1> 
+  <div class="download-grid" id="downloadGrid"> 
+   <div id="v5" class="app-card" data-keywords="移动端 app ios android 手机"> 
+    <div id="v6" class="app-name">
+      绿茶VPN(请使用MT管理器安装) 
+    </div> 
+    <div id="v7" class="app-desc">
+      Android-64位 
+    </div> 
+    <a id="v8" href="https://223-109-125-232-v2.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-120/091128b0/1829880754-0/091128b0259f3b86d71aff46cac62078/c-m8009?v=5&amp;t=1783583959&amp;r=9SS4SC&amp;bzc=2&amp;bzs=313832393838303735343a34373238303938333a383236363738393a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=1783583959b1d7345517b87a2feb7a8d41cbd40b38&amp;bzp=0&amp;bi=3986547563&amp;filename=%E7%BB%BF%E8%8C%B6VPN_2.6.4.apks&amp;x-mf-biz-cid=142c030c-be29-4698-b34a-f19bb6e2d2b6-3dab77&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v9" class="app-card" data-keywords="桌面版 windows macos 电脑 pc"> 
+    <div id="v10" class="app-name">
+      MT管理器 
+    </div> 
+    <div id="v11" class="app-desc">
+      Android-32,64位 
+    </div> 
+    <a id="v12" href="https://pan.mt2.cn/apk/26062662" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v13" class="app-card" data-keywords="浏览器插件 chrome edge 扩展 extension"> 
+    <div id="v14" class="app-name">
+      Akinator_9.0.21 
+    </div> 
+    <div id="v15" class="app-desc">
+      Android-64位 
+    </div> 
+    <a id="v16" href="https://223-109-125-230-v2.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-1018/da5cf950/1829880754-0/da5cf950770f96f8d7c61bb70c884bfa/c-m12?v=5&amp;t=1783584079&amp;r=A2GY88&amp;bzc=2&amp;bzs=313832393838303735343a34373334303937313a37303135303839373a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=178358407907f568e15ae2fe4329d43a055718b15c&amp;bzp=0&amp;bi=3986547563&amp;filename=Akinator_9.0.21.apk&amp;x-mf-biz-cid=7a742ecd-c50e-4d97-92ff-1694688c16ef-3dab77&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v17" class="app-card" data-keywords="手表版 watch wearos 智能手表"> 
+    <div id="v18" class="app-name">
+      圣安地列斯 
+    </div> 
+    <div id="v19" class="app-desc">
+      Android-32,64位 
+    </div> 
+    <a id="v20" href="https://111-6-117-62-v2.pd1.cjjd19.com:12349/1135-user-share-free-download-cdn.123295.com/123-673/5a2be4b8/1851300481-0/5a2be4b83ae30c5f027fe28c255f5aa1/c-m114?v=5&amp;t=1783584191&amp;r=X3U2DH&amp;bzc=2&amp;bzs=313832393838303735343a34373232303938343a31393630313836343a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=178358419135b14a35d1defde83b01112dfca30950&amp;bzp=0&amp;bi=3986547563&amp;filename=GTA_+SA+%2B+AML_2.00.apk&amp;x-mf-biz-cid=bd6e3ef9-c673-4026-a9c6-3822c15fab76-584000&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v21" class="app-card" data-keywords="tv版 电视 智能电视 盒子"> 
+    <div id="v22" class="app-name">
+      圣安地列斯PC端 
+    </div> 
+    <div id="v23" class="app-desc">
+      Windows-xp/11 
+    </div> 
+    <a id="v24" href="https://223-109-125-231-v2.pd1.cjjd19.com/1135-user-share-pay-download-cdn.123295.com/123-804/8d9d4303/1829880754-0/8d9d4303ba2b5aaad4988160f5809324/c-m42?v=5&amp;t=1783576083&amp;r=GZHQ79&amp;bzc=2&amp;bzs=313832393838303735343a34373235313030333a333633303531323836393a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=178357608382f23e956f3db3a707c70f2c19e09e62&amp;bzp=0&amp;bi=3986547563&amp;filename=%E5%9C%A3%E5%AE%89%E5%9C%B0%E5%88%97%E6%96%AF.7z&amp;x-mf-biz-cid=dddfba66-7b1c-4e1d-a382-9c3de42ad451-6eaa77&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v25" class="app-card" data-keywords="开发者工具 sdk api 开发"> 
+    <div id="v26" class="app-name">
+      荒野大镖客1 
+    </div> 
+    <div id="v27" class="app-desc">
+      IOS&amp;Android-64位 
+    </div> 
+    <a id="v28" href="https://223-109-125-227-v2.pd1.cjjd19.com/user-share-pay-download-cdn.123295.com/123-811/cc6308f7/1829880754-0/cc6308f72681f61326f57ed7ace2972b/c-m12?v=5&amp;t=1783585318&amp;r=GGC96L&amp;bzc=2&amp;bzs=313832393838303735343a34373433313030313a323839393531353637313a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=178358531862d850933c44a0583d8f4e5f6ce9d65b&amp;bzp=0&amp;bi=3986547563&amp;filename=RDR_1.53.61003005.apk&amp;x-mf-biz-cid=ae19a850-1958-4c9c-a2dc-65b971d25aa9-584000&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v29" class="app-card" data-keywords="音频版 播客 有声书 音乐 audio"> 
+    <div id="v30" class="app-name">
+      翻译机 
+    </div> 
+    <div id="v31" class="app-desc">
+      Android-vivo-32,64位 
+    </div> 
+    <a id="v32" href="https://223-109-125-229-v2.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-336/8132464a/1831394400-0/8132464a74aa6425296b5bccb8868150/c-m8009?v=5&amp;t=1783585022&amp;r=B2GFO1&amp;bzc=2&amp;bzs=313832393838303735343a34373232303938363a31373834363637393a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=17835850220c493b4b77e7e664d544d6d39276242e&amp;bzp=0&amp;bi=3986547563&amp;filename=%E7%BF%BB%E8%AF%91%E6%9C%BA_4.5.9.0.apk&amp;x-mf-biz-cid=6cfab134-b4ec-4119-aa84-4fcbe878cd53-08139d&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v33" class="app-card" data-keywords="游戏版 云游戏 手柄 game"> 
+    <div id="v34" class="app-name">
+      毒蛇VPN(先解压) 
+    </div> 
+    <div id="v35" class="app-desc">
+      Android-64位 
+    </div> 
+    <a id="v36" href="https://223-109-125-233-v2.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-734/21bdc8a6/1829880754-0/21bdc8a6d35753f5ba3e137a912972de/c-m8009?v=5&amp;t=1783584891&amp;r=G8CHX1&amp;bzc=2&amp;bzs=313832393838303735343a34373232303938353a33333735323531343a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=178358489179937d4951fafbd1efff007ad97cbb60&amp;bzp=0&amp;bi=3986547563&amp;filename=%E5%8A%A0%E9%80%9F%E5%99%A8.7z&amp;x-mf-biz-cid=b373e04a-f695-4ffa-9a7b-1ba3a1ccae78-3dab77&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v37" class="app-card" data-keywords="笔记版 记录 笔记 note"> 
+    <div id="v38" class="app-name">
+      Moepal 
+    </div> 
+    <div id="v39" class="app-desc">
+      网盘助手 
+    </div> 
+    <a id="v40" href="https://223-109-125-227-v2.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-469/6f17e9e7/1859929728-0/6f17e9e76d582d0e276dd4fe776a35d5/c-m8009?v=5&amp;t=1783584573&amp;r=DN7ML0&amp;bzc=2&amp;bzs=313832393838303735343a34373238303938343a33363335333730363a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=1783584573ba0e33a957b7798e9cac70efa6833a90&amp;bzp=0&amp;bi=3986547563&amp;filename=MoePal_4.2.0.apk&amp;x-mf-biz-cid=ce10b675-a415-4b02-b4da-508030912f04-08139d&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <div id="v41" class="app-card" data-keywords="安全中心 密码 隐私 security"> 
+    <div id="v42" class="app-name">
+      60秒生存 
+    </div> 
+    <div id="v43" class="app-desc">
+      Android-64位 
+    </div> 
+    <a id="v44" href="https://223-109-125-233-v2.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-357/bc58c838/1813236843-0/bc58c83864424a8b4349bfe2b253d565/c-m9013?v=5&amp;t=1783584448&amp;r=PSLOT1&amp;bzc=2&amp;bzs=313832393838303735343a34373337303939353a3230363732343931343a313835393835353938383a3130&amp;ur=ligvmlgvuagaul&amp;urn=0&amp;s=17835844484431fefc464898719025655802790131&amp;bzp=0&amp;bi=3986547563&amp;filename=60%E7%A7%92%E7%94%9F%E5%AD%98_10.15.apk&amp;x-mf-biz-cid=4cf50ac4-07c7-4cc3-9996-bbfc1c36dea4-584000&amp;auto_redirect=0&amp;ndcp=1&amp;cache_type=1" class="download-btn" target="_blank" rel="noopener noreferrer">立即下载</a> 
+   </div> 
+   <!-- ✅ 空状态提示 --> 
+   <div class="no-results" id="noResults">
+     未找到匹配的应用，请尝试其他关键词 
+   </div> 
+  </div> 
+  <div id="v45" class="update-hint">
+    更多应用请待更新 
+  </div> 
+  <script>
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.app-card');
+        const noResults = document.getElementById('noResults');
+
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                // 优先从 data-keywords 匹配，兜底匹配卡片内文字
+                const keywords = card.dataset.keywords || '';
+                const textContent = card.textContent.toLowerCase();
+                const match = !keyword || keywords.includes(keyword) || textContent.includes(keyword);
+
+                card.classList.toggle('hidden', !match);
+                if (match) visibleCount++;
+            });
+
+            // 切换空状态提示
+            noResults.classList.toggle('visible', visibleCount === 0 && keyword !== '');
+        });
+
+        // ESC 键清空搜索
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                this.dispatchEvent(new Event('input'));
+                this.blur();
+            }
+        });
+    </script> 
+  <h1 id="v46">当前版本：1.0</h1>  
+ </body>
+</html>
